@@ -1,39 +1,61 @@
-# Human–Machine Co-Creation with Music Diffusion Models via PCA-based Sliders
+# Controllable Music Co-Creation with Diffusion Models
 
-This repository contains the implementation work for an MS thesis on slider-based co-creation between musicians and text-to-audio diffusion models. We build on SliderSpace (Gandikota et al., 2025) and adapt its unsupervised discovery of semantic directions to music. The goal is a system where a musician can enter a prompt (e.g., “solo jazz guitar, warm tone, swing feel”) and then steer continuous musical axes such as brightness, density, or ambience through discovered “sliders” backed by LoRA adapters.
+Research scaffold for an MS thesis on discovering and training continuous,
+musically meaningful controls for text-to-audio diffusion models. The approach
+adapts SliderSpace-style semantic directions to audio by combining generated
+samples, CLAP embeddings, principal component analysis (PCA), and LoRA adapters.
 
-## SliderSpace-to-Audio Overview
+> **Status:** research prototype. The repository currently provides the
+> experiment structure and dry-run pipeline; backbone inference, real CLAP
+> embeddings, and LoRA optimization are planned integrations.
 
-For a fixed textual concept \(c\), the diffusion model induces a manifold of possible waveforms \( \mathcal{M}_\theta(c) \). We search for controllable directions \( \{T_i\}_{i=1}^n \) satisfying three SliderSpace principles: unsupervised discovery, semantic orthogonality, and distribution consistency. The pipeline mirrors the original paper but swaps image tools for audio components:
+## Research question
 
-1. **Distribution sampling:** Generate \(m\) clips \(x_j \sim \mathcal{M}_\theta(c)\) by varying diffusion seeds. Generation will come from Stable Audio Open 1.0 or a comparable open text-to-audio backbone.
-2. **Semantic encoding:** Use an audio–text encoder such as CLAP to embed each clip: \( \phi(x_j) \in \mathbb{R}^d \).
-3. **PCA decomposition:** Stack embeddings and compute principal components \(V = \mathrm{PCA}(\{\phi(x_j)\}) = \{v_i\}\). Each \(v_i\) represents one dominant variation axis in the concept’s sonic manifold.
-4. **Slider training:** Attach rank-\(r\) LoRA adapters to the diffusion model’s cross-attention layers. For slider \(i\), optimize adapter weights so that the CLAP shift \( \Delta \phi_i = \phi(\tilde{x}_i) - \phi(x) \) aligns with \(v_i\) via the SliderSpace loss
-\[
-    \mathcal{L}_{\text{slider}} = 1 - \cos(\Delta \phi_i, v_i).
-\]
-5. **Evaluation + UI:** Sweep slider strengths, analyze MIR descriptors (spectral centroid, onset density, dynamics), and verify that prompt alignment remains high. Promote robust sliders into an interactive co-creation demo (e.g., Gradio) where users can audition combinations in real time.
+Can a musician start from a text prompt and steer independent properties such
+as brightness, density, ambience, or rhythmic activity without retraining the
+full diffusion model?
 
-This formulation keeps the creative exploration workflow faithful to SliderSpace while grounding each discovered direction in musically meaningful audio statistics and listening tests.
+## Proposed pipeline
 
-## Repository Layout
+1. Sample multiple clips for a fixed prompt while varying diffusion seeds.
+2. Embed each clip with an audio–text representation model such as CLAP.
+3. Apply PCA to discover dominant directions in the prompt-conditioned audio
+   manifold.
+4. Train lightweight LoRA adapters whose embedding shifts align with selected
+   directions.
+5. Evaluate direction consistency with audio descriptors, prompt alignment,
+   and listening tests.
 
-- `configs/`: shared configuration files (model checkpoints, data roots, default prompts).
-- `scripts/`:
-  - `generate_samples.py`: placeholder sampler that will call Stable Audio Open once hooked up.
-  - `compute_embeddings.py`: computes (currently stubbed) CLAP embeddings for every concept.
-  - `run_pca.py`: performs PCA on stored embeddings and records variance summaries.
-  - `train_sliders.py`: records slider-training plans; will hold the LoRA optimization loop.
-- `data/raw`, `data/embeddings`, `data/pca`: generated artifacts per concept.
-- `latex/ms_thesis_notes.tex`: living thesis notes describing methodology, experiments, and open questions.
-- `notebooks/`: interactive analysis and visualization (to be filled as experiments ramp up).
+## Run the scaffold
 
-## Project Log
+```bash
+git clone https://github.com/takakhoo/HumanMusic_CoCreation_DiffusionModel_PCA.git
+cd HumanMusic_CoCreation_DiffusionModel_PCA
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+python -m pip install -r requirements.txt
 
-### 2025-02-08 23:59 EST
-- Initialized the repository structure under `/scratch/f004h1v/MS_Thesis` with folders for configs, scripts, raw/derived data, LaTeX notes, and notebooks.
-- Added `configs/model_config.yaml` plus initial script stubs for sample generation, CLAP embeddings, PCA, and slider training plans.
-- Drafted `latex/ms_thesis_notes.tex` describing motivation, method overview, evaluation plan, and open questions for translating SliderSpace to audio.
-- Scripts currently emit placeholder audio/embeddings so that we can test the pipeline end-to-end before integrating Stable Audio Open + CLAP.
-- Next steps: (1) hook up Stable Audio Open inference in `generate_samples.py`; (2) load a real CLAP checkpoint for `compute_embeddings.py`; (3) implement LoRA optimization inside `scripts/train_sliders.py`; (4) start collecting pilot prompts and MIR metrics for slider evaluation.
+python scripts/generate_samples.py
+python scripts/compute_embeddings.py
+python scripts/run_pca.py
+python scripts/train_sliders.py
+```
+
+The commands validate data flow and configuration; they do not yet train a
+usable audio slider.
+
+## Repository map
+
+- `configs/model_config.yaml` — model, prompt, and output configuration
+- `scripts/generate_samples.py` — sample-generation interface and placeholder
+- `scripts/compute_embeddings.py` — embedding stage interface and placeholder
+- `scripts/run_pca.py` — PCA stage and explained-variance artifacts
+- `scripts/train_sliders.py` — LoRA training plan/interface
+- `latex/ms_thesis_notes.tex` — method notes and open research questions
+- `Papers/SliderSpacePaper.pdf` — motivating reference paper
+
+## Evaluation plan
+
+Candidate controls should be judged on monotonicity across slider strengths,
+semantic independence, prompt preservation, perceptual quality, and agreement
+between objective MIR descriptors and human listening tests.
