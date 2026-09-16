@@ -29,8 +29,8 @@ full diffusion model?
 ## Run the scaffold
 
 ```bash
-git clone https://github.com/takakhoo/HumanMusic_CoCreation_DiffusionModel_PCA.git
-cd HumanMusic_CoCreation_DiffusionModel_PCA
+git clone https://github.com/takakhoo/audio-diffusion-control.git
+cd audio-diffusion-control
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 python -m pip install -r requirements.txt
@@ -45,6 +45,13 @@ These commands execute the repository's deterministic scaffold from generated
 placeholder clips through embeddings, PCA, and a saved slider-training plan.
 They validate data flow and configuration; they do not run a diffusion model,
 compute real CLAP embeddings, or train a usable audio slider.
+
+## Verification
+
+The four-stage scaffold was run end to end on September 16, 2026. It produced
+placeholder clips, embeddings, PCA artifacts, and a slider-training plan for
+the documented concept. This verifies orchestration and artifact contracts,
+not the still-unimplemented backbone, CLAP, or LoRA integrations.
 
 ## Repository map
 
