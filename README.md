@@ -36,13 +36,15 @@ source .venv/bin/activate  # Windows: .venv\Scripts\activate
 python -m pip install -r requirements.txt
 
 python scripts/generate_samples.py
-python scripts/compute_embeddings.py
-python scripts/run_pca.py
-python scripts/train_sliders.py
+python scripts/compute_embeddings.py --concept solo_jazz_guitar_warm_tone_swing_feel
+python scripts/run_pca.py --concept solo_jazz_guitar_warm_tone_swing_feel
+python scripts/train_sliders.py --concept solo_jazz_guitar_warm_tone_swing_feel
 ```
 
-The commands validate data flow and configuration; they do not yet train a
-usable audio slider.
+These commands execute the repository's deterministic scaffold from generated
+placeholder clips through embeddings, PCA, and a saved slider-training plan.
+They validate data flow and configuration; they do not run a diffusion model,
+compute real CLAP embeddings, or train a usable audio slider.
 
 ## Repository map
 
