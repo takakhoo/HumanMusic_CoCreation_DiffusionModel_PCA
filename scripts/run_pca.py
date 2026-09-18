@@ -74,10 +74,13 @@ def main() -> None:
         embedding_model = data["embedding_model"].item() if data["embedding_model"].shape == () else data["embedding_model"]
 
     logging.info("Running PCA with %d components on matrix of shape %s", args.n_components, embeddings.shape)
-    pca = PCA(n_components=args.n_components, svd_solver="auto", whiten=False)
+    if embeddings.ndim != 2 or not np.isfinite(embeddings).all() or not 1 <= args.n_components <= min(embeddings.shape):
+        raise ValueError("Need finite 2D embeddings and 1 <= n_components <= min(samples, features)")
+    pca = PCA(n_components=args.n_components, svd_solver="full", whiten=False)
     projections = pca.fit_transform(embeddings)
 
     output_path = args.output_path or pca_root / f"{args.concept}_pca.npz"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     np.savez(
         output_path,
         components=pca.components_,

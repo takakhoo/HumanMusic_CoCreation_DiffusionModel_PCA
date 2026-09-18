@@ -48,7 +48,7 @@ class ClapEmbedder:
     def __init__(self, cfg: Dict[str, Any]) -> None:
         emb_cfg = cfg.get("embedding_model", {})
         self.embedding_dim = int(emb_cfg.get("embedding_dim", 512))
-        self.name = emb_cfg.get("name", "clap-placeholder")
+        self.name = "placeholder-random-sha256-NOT-CLAP"
 
     def encode(self, audio: np.ndarray, sample_rate: int) -> np.ndarray:
         """Return a deterministic pseudo-embedding based on the waveform."""
@@ -132,6 +132,7 @@ def main() -> None:
 
     embedding_matrix = np.stack(embeddings, axis=0)
     output_path = args.output_path or embeddings_root / f"{args.concept}.npz"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
     np.savez(
         output_path,
@@ -139,6 +140,7 @@ def main() -> None:
         filenames=[str(p) for p in wav_paths],
         embedding_model=embedder.name,
         embedding_dim=embedder.embedding_dim,
+        is_placeholder=True,
     )
 
     index_path = output_path.with_suffix(".index.json")
